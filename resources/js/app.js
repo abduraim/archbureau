@@ -19,12 +19,106 @@ window.Vue = require('vue');
 // const files = require.context('./', true, /\.vue$/i)
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
-Vue.component('index-component', require('./components/Index.vue').default);
+// Vue.component('Menu', require('./components/Menu').default);
+
+
+import App from "./pages/App";
+
+// Pages
+import PageIndex from "./pages/PageIndex";
+import PageAbout from "./pages/PageAbout";
+import PageAboutContacts from "./pages/PageAboutContacts";
+import PageAboutCompany from "./pages/PageAboutCompany";
+import PageAboutPeople from "./pages/PageAboutPeople";
+import PageProjects from "./pages/PageProjects";
+
+//BaseComponents
+Vue.component('BaseCard', require('./components/base/BaseCard').default);
+Vue.component('BaseScroll', require('./components/base/BaseScroll').default);
+Vue.component('BaseAccordion', require('./components/base/BaseAccordion').default);
+Vue.component('BaseAccordionItem', require('./components/base/BaseAccordionItem').default);
 
 
 
 
+// Vuex
+import Vuex from 'vuex';
+Vue.use(Vuex);
+const store = new Vuex.Store({
+    state: {
+        currentLanguage: null,
+    },
+    mutations: {
+        setCurrentLanguage (state, language) {
+            state.currentLanguage = language;
+        }
+    },
+});
 
+
+// Router
+import VueRouter from 'vue-router'
+Vue.use(VueRouter)
+const router = new VueRouter({
+    mode: 'history',
+    routes: [
+        {
+            path: '/',
+            redirect: '/ru'
+        },
+        {
+            path: '/:lang',
+            component: PageIndex,
+        },
+        {
+            path: '/:lang/about',
+            name: 'about',
+            component: PageAbout,
+            children: [
+                {
+                    path: 'company',
+                    name: 'about-company',
+                    component: PageAboutCompany,
+                },
+                {
+                    path: 'contacts',
+                    name: 'about-contacts',
+                    component: PageAboutContacts
+                },
+                {
+                    path: 'people',
+                    name: 'about-people',
+                    component: PageAboutPeople
+                },
+            ],
+        },
+        {
+            path: '/:lang/projects',
+            name: 'projects',
+            component: PageProjects,
+        },
+        {
+            path: '/:lang/ideas',
+            name: 'ideas',
+            component: PageProjects,
+        },
+        {
+            path: '/:lang/creation',
+            name: 'creation',
+            component: PageProjects,
+        },
+        {
+            path: '/:lang/news',
+            name: 'news',
+            component: PageProjects,
+        },
+        {
+            // not found
+            path: '/:lang/*',
+            component: PageIndex,
+        },
+    ]
+});
 
 
 
@@ -37,4 +131,25 @@ Vue.component('index-component', require('./components/Index.vue').default);
 
 const app = new Vue({
     el: '#app',
+    data: {
+
+    },
+    components: {
+        App,
+    },
+    watch: {
+        $route(to, from) {
+            this.checkPath();
+        }
+    },
+    methods: {
+        checkPath() {
+            store.commit('setCurrentLanguage', this.$route.params.lang)
+        },
+    },
+    mounted() {
+        this.checkPath();
+    },
+    store,
+    router
 });
